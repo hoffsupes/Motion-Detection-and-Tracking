@@ -1,3 +1,14 @@
+
+//////////////////////////////////////////////////////////////////////
+//. Disclaimer:
+// ************************************************************
+// Warning! This contains the **WHOLE** workspace over the development (at least most of it) including most of the attempts
+// and is NOT the final version that was submitted (may be the LATEST WORKING REVISION but not the version which was cleaned up and submitted but the one I kept for future reference, personal use and records) but because of being in its early stages
+// of dev, contains the initial RAW version of ALL (most) of the code present. This means that only the functions USED in the code are the one's relevant.
+// ALSO USE AT YOUR OWN RISK.
+// ************************************************************
+// ************************************************************
+
 /*
 
 
@@ -44,138 +55,6 @@ Prof. Dr. Rajender Bahl
 using namespace std;
 using namespace cv;
 using	namespace	cv::videostab;
-
-void cvShiftDFT(Mat src_arr, Mat& dst_arr )
-{
-    Mat tmp;
-    Mat  q1,  q2,  q3,  q4;
-    Mat  d1,  d2,  d3,  d4;
-	bool isEqual = (sum(src_arr != dst_arr) == Scalar(0,0));  // Check Channels every 300 frames
-    Size size = src_arr.size();
-    Size dst_size = dst_arr.size();
-	
-    int cx, cy;
-
-    if(dst_size.width != size.width ||  dst_size.height != size.height)
-	{
-        cvError( CV_StsUnmatchedSizes,"cvShiftDFT", "Source and Destination arrays must have equal sizes",__FILE__, __LINE__ );   
-    }
-	
-    if( isEqual == true )
-	{
-        tmp = Mat(size.height/2, size.width/2, src_arr.type());
-    }
-    
-    cx = size.width/2;
-    cy = size.height/2; // image center
-
-    q1 =   src_arr( Rect(0,0,cx, cy) );
-    q2 =   src_arr( Rect(cx,0,cx,cy) );
-    q3 =   src_arr( Rect(cx,cy,cx,cy) );
-    q4 =   src_arr( Rect(0,cy,cx,cy) );
-    d1 =   src_arr( Rect(0,0,cx,cy) );
-    d2 =   src_arr( Rect(cx,0,cx,cy) );
-    d3 =   src_arr( Rect(cx,cy,cx,cy) );
-    d4 =  src_arr( Rect(0,cy,cx,cy) );
-
-    if(isEqual == false)
-	{
-        if(  q1.type() != d1.type() )
-		{
-            cvError( CV_StsUnmatchedFormats, 
-			"cvShiftDFT", "Source and Destination arrays must have the same format",
-			__FILE__, __LINE__ ); 
-        }
-		
-		
-        q3.copyTo(d1);
-        q4.copyTo(d2);
-        q1.copyTo(d3);
-        q2.copyTo(d4);
-    }
-	
-    else{
-        q3.copyTo(tmp);
-        q1.copyTo(q3);
-        tmp.copyTo(q1);
-        q4.copyTo(tmp);
-        q2.copyTo(q4);
-        tmp.copyTo(q2);
-		tmp.release();
-		    }
-	
-		q1.release();
-		q2.release();
-		q3.release();
-		q4.release();
-		d1.release();
-		d2.release();
-		d3.release();
-		d4.release();
-	
-	
-	
-}
-
-Mat create_filter(Mat dft_Filter, int D, int n, float upper, float lower)
-{
-	Mat single = Mat(dft_Filter.rows, dft_Filter.cols, CV_64FC1 ); 
-	
-	Point centre = Point(dft_Filter.rows / 2, dft_Filter.cols / 2);
-	float radius;
-	float tx,ty;
-	float td;
-	
-	for(int i = 0; i < dft_Filter.rows; i++)
-	{
-		for(int j = 0; j < dft_Filter.cols; j++)
-		{
-			radius = (double) sqrt(pow((i - centre.x), 2.0) + pow((double) (j - centre.y), 2.0));
-			single.at<double>(i, j) = ((upper - lower) * ( 1 / (1 + pow( (double) (D /  radius), (double) (2 * n)   )))) + lower;
-		}	
-	}
-
-	/*
-	vector<Mat> h;
-	h.push_back(single);
-	h.push_back(single);
-	Mat outputfil;
-	merge(h,outputfil);	
-	single.release();
-	return outputfil;
-	*/
-	return single;
-	
-}
-
-Mat create_filter_twolayer(Mat dft_Filter, int D, int n, float upper, float lower)
-{
-	Mat single = Mat(dft_Filter.rows, dft_Filter.cols, CV_64FC1 ); 
-	
-	Point centre = Point(dft_Filter.rows / 2, dft_Filter.cols / 2);
-	float radius;
-	float tx,ty;
-	float td;
-	
-	for(int i = 0; i < dft_Filter.rows; i++)
-	{
-		for(int j = 0; j < dft_Filter.cols; j++)
-		{
-			radius = (double) sqrt(pow((i - centre.x), 2.0) + pow((double) (j - centre.y), 2.0));
-			single.at<double>(i, j) = ((upper - lower) * ( 1 / (1 + pow( (double) (D /  radius), (double) (2 * n)   )))) + lower;
-		}	
-	}
-
-	
-	vector<Mat> h;
-	h.push_back(single);
-	h.push_back(single);
-	Mat outputfil;
-	merge(h,outputfil);	
-	single.release();
-	return outputfil;
-	
-}
 
 void homomor(Mat src, Mat &dst,Mat kernel)
 {
